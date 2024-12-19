@@ -1,35 +1,62 @@
 import { CSSProperties } from "react"
+import {margin5px} from "../constants/margins";
+import {
+    alignmentCenter,
+    displayStyleFlex,
+    displayStyleInlineBlock,
+    flexDirectionColumn
+} from "../constants/displayStyles";
+import {padding2px} from "../constants/paddings";
+import {colorGray, colorWhite} from "../constants/colors";
+import {frontFamilySystemUI} from "../constants/fontFamilies";
+import {fontWeight150} from "../constants/fontWeights";
+import {labelAddEquation} from "../constants/labels";
+import {fontSize30px} from "../constants/fontSizes";
 
 interface AddEquationLabelProps {
-    fontFamily: string;
-    fontSize: string|number;
-    fontColor: string;
-    backgroundColor: string;
+    fontSize?: string;
+    fontColor?: string;
+    label?: string[]
+    fontFamily?: string;
+    backgroundColor?: string;
+    display?: string;
+    padding?: string;
+    margin?: string;
+    fontWeight?: number;
 }
 
 const AddEquationLabel: React.FC<AddEquationLabelProps> = (
     {
-        fontFamily,
-        fontSize,
-        fontColor,
-        backgroundColor,
+        fontSize = fontSize30px,
+        fontColor = colorGray,
+        label = labelAddEquation,
+        fontFamily = frontFamilySystemUI,
+        backgroundColor = colorWhite,
+        display = displayStyleFlex,
+        padding = padding2px,
+        margin = margin5px,
+        fontWeight = fontWeight150,
     }: AddEquationLabelProps) => {
     const cssStylingProperties: CSSProperties = {
+        display: display,
+        justifyContent: alignmentCenter,
+        flexWrap: "wrap",
         fontFamily: fontFamily,
         fontSize: fontSize,
         color: fontColor,
         backgroundColor: backgroundColor,
-        display: "inline-block",
-        padding: "2px",
-        margin: "5px",
-        borderRadius: "5px",
+        padding: padding,
+        margin: margin,
+        fontWeight: fontWeight,
     }
 
     return (
         <div
             style={cssStylingProperties}
         >
-            Add Equation
+            {label && label.map((text, index) => (
+                <div key={index}>{text}</div>
+            ))}
         </div>
     )
 }

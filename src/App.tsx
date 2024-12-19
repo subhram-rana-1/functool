@@ -1,17 +1,14 @@
-import AddEquation from "./components/AddEquationLabel"
-import {colorWhite, colorBlack} from "./constants/colors"
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LandingPage from "./components/pages/LandingPage";
 
 function App() {
   return (
-      <div>
-        <AddEquation
-            fontFamily={"Arial"}
-            fontSize={"22px"}
-            fontColor={colorWhite}
-            backgroundColor={colorBlack}
-        />
-      </div>
+      <Router>
+          <Routes>
+              <Route path="/" element={<LandingPage />} />
+          </Routes>
+      </Router>
   )
 }
 
-export default App
+export default App;
