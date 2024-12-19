@@ -1,0 +1,11 @@
+.plus-icon-button {
+
+}
+
+.plus-icon-button:active {
+    transform: scale(1.1); /* Scale when clicked */
+    background-color: #ea2222; /* Change to red on click */
+    color: white; /* Text color change to white */
+    transition: background-color 0.02s ease, transform 0.1s ease; /* Animate background-color and scaling */
+    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.2);
+}

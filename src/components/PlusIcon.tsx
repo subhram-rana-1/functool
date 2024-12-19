@@ -5,11 +5,11 @@ import {
     alignmentCenter,
     displayStyleFlex,
 } from "../constants/displayStyles";
-import {padding2px} from "../constants/paddings";
 import {margin5px} from "../constants/margins";
 import {fontWeight1} from "../constants/fontWeights";
 import {fontSize120px} from "../constants/fontSizes";
 import {borderRadius_35_percent} from "../constants/borderRadius";
+import '../assets/css/plusIcon.css';
 
 interface PlusIconProps {
     fontSize?: string;
@@ -54,6 +54,7 @@ const PlusIcon: React.FC<PlusIconProps> = (
     return (
         <div
             style={cssStylingProperties}
+            className='plus-icon-button'
         >
             +
         </div>

@@ -1,10 +1,8 @@
 import { CSSProperties } from "react"
-import {margin5px} from "../constants/margins";
+import {margin10px, margin5px} from "../constants/margins";
 import {
     alignmentCenter,
     displayStyleFlex,
-    displayStyleInlineBlock,
-    flexDirectionColumn
 } from "../constants/displayStyles";
 import {padding2px} from "../constants/paddings";
 import {colorGray, colorWhite} from "../constants/colors";
@@ -55,7 +53,7 @@ const AddEquationLabel: React.FC<AddEquationLabelProps> = (
             style={cssStylingProperties}
         >
             {label && label.map((text, index) => (
-                <div key={index}>{text}</div>
+                <div style={{ marginRight: margin10px }} key={index}>{text}</div>
             ))}
         </div>
     )
