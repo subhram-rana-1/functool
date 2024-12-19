@@ -1,5 +1,7 @@
+export const colorTransparent = 'transparent'
 export const colorWhite = '#ffffff'
 export const colorGrayBG = '#f0f0f0'
 export const colorGray = '#b7b2b1'
 export const colorGray2 = '#9e9b9a'
+export const colorDarkGray = '#5b5a5a'
 export const colorBlack = '#000000'
