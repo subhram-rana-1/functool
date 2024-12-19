@@ -1,6 +1,16 @@
+import AddEquation from "./components/AddEquationLabel"
+import {colorWhite, colorBlack} from "./constants/colors"
+
 function App() {
   return (
-      <div>hey subhram</div>
+      <div>
+        <AddEquation
+            fontFamily={"Arial"}
+            fontSize={"22px"}
+            fontColor={colorWhite}
+            backgroundColor={colorBlack}
+        />
+      </div>
   )
 }
 
