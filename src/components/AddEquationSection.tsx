@@ -1,5 +1,5 @@
 import {CSSProperties} from "react";
-import PlusIcon from "./PlusIcon";
+import PlusIconLandingPage from "./PlusIconLandingPage";
 import AddEquationLabel from "./AddEquationLabel";
 import {alignmentCenter, displayStyleFlex, flexDirectionColumn} from "../constants/displayStyles";
 
@@ -19,7 +19,7 @@ const AddEquationSection: React.FC<AddEquationSectionProps> = (
         <div
             style={cssStylingProperties}
         >
-            <PlusIcon
+            <PlusIconLandingPage
                 padding={'0px 28px 13px 31px'}
             />
             <AddEquationLabel />

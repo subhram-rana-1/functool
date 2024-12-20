@@ -1,20 +1,21 @@
 import {CSSProperties} from "react";
 import {frontFamilySystemUI} from "../constants/fontFamilies";
-import {colorGray2, colorGrayBG, colorWhite} from "../constants/colors";
+import {colorGray2, colorGrayBG, colorTransparent, colorWhite} from "../constants/colors";
 import {
     alignmentCenter,
     displayStyleFlex,
 } from "../constants/displayStyles";
 import {margin5px} from "../constants/margins";
 import {fontWeight1} from "../constants/fontWeights";
-import {fontSize120px} from "../constants/fontSizes";
-import {borderRadius_35_percent} from "../constants/borderRadius";
-import '../assets/css/plusIcon.css';
+import {fontSize120px, fontSize30px} from "../constants/fontSizes";
+import '../assets/css/button.css';
+import {cursorPointer} from "../constants/Cursors";
+import {borderRadius_10px, borderRadius_35_percent, borderRadius_50_percent} from "../constants/borderRadius";
 
-interface PlusIconProps {
+interface ButtonProps {
+    label: string;
     fontSize?: string;
     fontColor?: string;
-    label?: string
     fontFamily?: string;
     backgroundColor?: string;
     display?: string;
@@ -22,22 +23,26 @@ interface PlusIconProps {
     margin?: string;
     fontWeight?: number;
     borderRadius?: string;
+    width?: string;
 }
 
-const PlusIcon: React.FC<PlusIconProps> = (
+const Button: React.FC<ButtonProps> = (
     {
-        fontSize = fontSize120px,
+        label,
+        fontSize = fontSize30px,
         fontColor = colorGray2,
         fontFamily = frontFamilySystemUI,
         backgroundColor = colorGrayBG,
         display = displayStyleFlex,
-        padding = '0px 30px 10px 30px',
+        padding = '0px 5px 0px 5px',
         margin = margin5px,
         fontWeight = fontWeight1,
-        borderRadius = borderRadius_35_percent,
-    }: PlusIconProps
+        borderRadius = borderRadius_10px,
+    }: ButtonProps
 ) => {
     const cssStylingProperties: CSSProperties = {
+        cursor: cursorPointer,
+        border: 'none',
         justifyContent: alignmentCenter,
         alignItems: alignmentCenter,
         fontFamily: fontFamily,
@@ -52,13 +57,13 @@ const PlusIcon: React.FC<PlusIconProps> = (
     }
 
     return (
-        <div
+        <button
             style={cssStylingProperties}
-            className='plus-icon-button'
+            className='button'
         >
-            +
-        </div>
+            {label}
+        </button>
     )
 }
 
-export default PlusIcon;
+export default Button;
