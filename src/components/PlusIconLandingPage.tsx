@@ -1,15 +1,22 @@
 import {borderRadius_35_percent} from "../constants/borderRadius";
 import Button from "./Button";
+import {fontSize120px} from "../constants/fontSizes";
+import {Simulate} from "react-dom/test-utils";
 
-interface PlusIconLandingPageProps {}
+interface PlusIconLandingPageProps {
+    padding?: string;
+}
 
 const PlusIconLandingPage: React.FC<PlusIconLandingPageProps> = (
-    {}: PlusIconLandingPageProps
+    {
+        padding,
+    }: PlusIconLandingPageProps
 ) => {
     return (
         <Button
             label={'+'}
-            padding = {'0px 30px 10px 30px'}
+            fontSize={fontSize120px}
+            padding = {padding}
             borderRadius = {borderRadius_35_percent}
         />
     )

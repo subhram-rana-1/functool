@@ -20,7 +20,7 @@ const AddEquationSection: React.FC<AddEquationSectionProps> = (
             style={cssStylingProperties}
         >
             <PlusIconLandingPage
-                padding={'0px 28px 13px 31px'}
+                padding={'0px 40px 13px 43px'}
             />
             <AddEquationLabel />
         </div>

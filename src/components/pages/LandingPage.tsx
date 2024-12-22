@@ -1,27 +1,16 @@
-import React, {CSSProperties} from "react";
-import AddEquationSection from "../AddEquationSection";
-import {alignmentCenter, displayStyleFlex, flexDirectionColumn} from "../../constants/displayStyles";
+import React from 'react';
+import Navbar from "../Navbar";
+import Ads from "../Ads";
+import MainContent from "../MainContent";
 
-interface LandingPageProps {}
-
-const LandingPage: React.FC<LandingPageProps> = (
-    {}: LandingPageProps
-) => {
-    const cssStylingProperties: CSSProperties = {
-        display: displayStyleFlex,
-        flexDirection: flexDirectionColumn,
-        justifyContent: alignmentCenter,
-        alignItems: alignmentCenter,
-        height: '90vh',
-    }
-
+const MobileLayout = () => {
     return (
-        <div
-            style={cssStylingProperties}
-        >
-            <AddEquationSection/>
+        <div className="flex flex-col h-screen bg-gray-100">
+            <Navbar />
+            <MainContent />
+            <Ads />
         </div>
-    )
-}
+    );
+};
 
-export default LandingPage;
+export default MobileLayout;
