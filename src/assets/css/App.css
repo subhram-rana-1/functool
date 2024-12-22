@@ -1,3 +1,20 @@
-.app-dark-gray {
-    background-color: #575757;
+.app-dark-violate {
+    background-color: #7200B0; /*575757, 7200B0*/
+}
+
+.text-dark-violate {
+    color: #7200B0; /*575757, 7200B0*/
+}
+
+.border-dark-violate {
+    border: 2px solid #7200B0;
+    border-radius: 15px;
+}
+
+.app-light-violate {
+    background-color: #a66ac6; /*575757, 7200B0*/
+}
+
+.ads-area-gray {
+    background-color: white; /* #EDEDED */
 }

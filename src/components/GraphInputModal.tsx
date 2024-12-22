@@ -5,12 +5,20 @@ import DoneButton from "./DoneButton";
 import HelpButton from "./HelpButton";
 import DoubleRangeSlider from "./DoubleRangeSlider";
 import ColorSelector from "./ColorSelector";
+import WhiteboardModal from "./WhiteboardModal";
+import {useState} from "react";
 
 interface GraphInputModalProps {}
 
 const GraphInputModal: React.FC<GraphInputModalProps> = (
     {}: GraphInputModalProps
 ) => {
+    const [isModalOpen, setIsModalOpen] = useState(true);
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
     return (
         <div>
             <div><CancelIcon /></div>
@@ -20,6 +28,10 @@ const GraphInputModal: React.FC<GraphInputModalProps> = (
             <div><HelpButton /></div>
             <div><DoubleRangeSlider /></div>
             <div><ColorSelector /></div>
+            <div><WhiteboardModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+            /></div>
         </div>
     )
 }
