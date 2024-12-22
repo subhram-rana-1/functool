@@ -1,11 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Hand } from 'lucide-react';
 
 const WhiteboardModal = ({ isOpen, onClose }) => {
     const [isDrawing, setIsDrawing] = useState(false);
+    const [isPanning, setIsPanning] = useState(false);
     const [tool, setTool] = useState('pencil');
     const [selectedColor, setSelectedColor] = useState('#190eff');
     const [hasContent, setHasContent] = useState(false);
+    const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+    const [startPanPoint, setStartPanPoint] = useState({ x: 0, y: 0 });
+    const [canvasContent, setCanvasContent] = useState(null);
+
     const canvasRef = useRef(null);
     const contextRef = useRef(null);
 
@@ -15,7 +20,6 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
         { id: 1, color: '#ef2e1a' },
     ];
 
-    // ... [Previous helper functions remain unchanged]
     const createDottedPattern = (context) => {
         const patternCanvas = document.createElement('canvas');
         const patternContext = patternCanvas.getContext('2d');
@@ -43,7 +47,6 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
         canvas.width = rect.width;
         canvas.height = rect.height;
 
-        context.setTransform(1, 0, 0, 1, 0, 0);
         context.lineCap = 'round';
         context.strokeStyle = selectedColor;
         context.lineWidth = 2;
@@ -53,6 +56,11 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         contextRef.current = context;
+
+        // Restore previous content if exists
+        if (canvasContent) {
+            context.putImageData(canvasContent, panOffset.x, panOffset.y);
+        }
     };
 
     useEffect(() => {
@@ -94,24 +102,85 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
         };
     };
 
+    const startPanning = (e) => {
+        e.preventDefault();
+        setIsPanning(true);
+        const { clientX, clientY } = e.touches ? e.touches[0] : e;
+        setStartPanPoint({ x: clientX, y: clientY });
+
+        // Store current canvas content before panning
+        if (contextRef.current) {
+            const canvas = canvasRef.current;
+            setCanvasContent(contextRef.current.getImageData(0, 0, canvas.width, canvas.height));
+        }
+    };
+
+    const handlePanning = (e) => {
+        if (!isPanning) return;
+        e.preventDefault();
+
+        const { clientX, clientY } = e.touches ? e.touches[0] : e;
+        const deltaX = clientX - startPanPoint.x;
+        const deltaY = clientY - startPanPoint.y;
+
+        setPanOffset(prev => ({
+            x: prev.x + deltaX,
+            y: prev.y + deltaY
+        }));
+        setStartPanPoint({ x: clientX, y: clientY });
+
+        // Redraw canvas content at new position
+        if (contextRef.current && canvasContent) {
+            const canvas = canvasRef.current;
+            contextRef.current.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Redraw background pattern
+            const pattern = createDottedPattern(contextRef.current);
+            contextRef.current.fillStyle = pattern;
+            contextRef.current.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw content at new position
+            contextRef.current.putImageData(canvasContent, panOffset.x + deltaX, panOffset.y + deltaY);
+        }
+    };
+
+    const stopPanning = () => {
+        setIsPanning(false);
+    };
+
     const startDrawing = (e) => {
+        if (tool === 'pan') {
+            startPanning(e);
+            return;
+        }
+
         e.preventDefault();
         const { x, y } = getCoordinates(e);
         contextRef.current.beginPath();
-        contextRef.current.moveTo(x, y);
+        contextRef.current.moveTo(x - panOffset.x, y - panOffset.y);
         setIsDrawing(true);
         setHasContent(true);
     };
 
     const draw = (e) => {
+        if (tool === 'pan') {
+            handlePanning(e);
+            return;
+        }
+
         if (!isDrawing) return;
         e.preventDefault();
         const { x, y } = getCoordinates(e);
-        contextRef.current.lineTo(x, y);
+        contextRef.current.lineTo(x - panOffset.x, y - panOffset.y);
         contextRef.current.stroke();
     };
 
     const stopDrawing = () => {
+        if (tool === 'pan') {
+            stopPanning();
+            return;
+        }
+
         if (contextRef.current) {
             contextRef.current.closePath();
         }
@@ -120,7 +189,24 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
 
     const clearCanvas = () => {
         if (!canvasRef.current) return;
-        initializeCanvas();
+
+        setPanOffset({ x: 0, y: 0 });
+        setCanvasContent(null);
+
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        context.lineCap = 'round';
+        context.strokeStyle = selectedColor;
+        context.lineWidth = 2;
+
+        const pattern = createDottedPattern(context);
+        context.fillStyle = pattern;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        contextRef.current = context;
         setHasContent(false);
     };
 
@@ -129,19 +215,29 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
         if (!contextRef.current) return;
 
         const context = contextRef.current;
-        context.strokeStyle = newTool === 'eraser' ? '#FFFCF8' : selectedColor;
-        context.lineWidth = newTool === 'eraser' ? 20 : 2;
+        if (newTool === 'eraser') {
+            context.strokeStyle = '#FFFCF8';
+            context.lineWidth = 20;
+        } else if (newTool === 'pencil') {
+            context.strokeStyle = selectedColor;
+            context.lineWidth = 2;
+        }
     };
 
     if (!isOpen) return null;
 
     return (
         <div
-            className="fixed inset-0 flex items-center justify-center z-50 transition-all duration-300"
+            className={`fixed inset-0 flex items-center justify-center z-50 transition-all duration-300 
+                ${isOpen ? 'opacity-100 backdrop-blur-sm' : 'opacity-0 pointer-events-none'}`}
             onClick={(e) => e.target === e.currentTarget && onClose()}
         >
             <div
-                className="bg-white rounded-2xl shadow-xl p-1 w-full max-w-2xl mx-2 transition-all duration-200 ease-out transform"
+                className={`
+    bg-white rounded-2xl shadow-xl p-1 w-full max-w-2xl mx-2 transition-all duration-700 ease-out transform
+    ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}
+  `}
+
                 onClick={e => e.stopPropagation()}
             >
                 <div className="relative mb-2">
@@ -151,7 +247,6 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
                         </div>
                     )}
 
-                    {/* Close button */}
                     <button
                         onClick={onClose}
                         className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5
@@ -175,11 +270,17 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
                     />
                 </div>
 
-                {/* Optimized controls layout */}
                 <div className="flex flex-col items-center justify-center px-4 py-2 mb-2">
                     <div className="flex items-center justify-around w-full">
-                        {/* Tools section */}
                         <div className="flex gap-3 bg-none p-2 rounded-3xl">
+                            <button
+                                onClick={() => handleToolChange('pan')}
+                                className={`p-1.5 rounded-3xl transition-all duration-200 ${
+                                    tool === 'pan' ? 'bg-violet-400 scale-125' : 'hover:bg-violet-300'
+                                }`}
+                            >
+                                <Hand size={20} />
+                            </button>
                             <button
                                 onClick={() => handleToolChange('pencil')}
                                 className={`p-1.5 rounded-3xl transition-all duration-200 ${
@@ -204,7 +305,6 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
                             </button>
                         </div>
 
-                        {/* Color options */}
                         <div className="flex gap-3">
                             {colors.map((c) => (
                                 <button
@@ -226,10 +326,9 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
                         </div>
                     </div>
 
-                    {/* Done button */}
-                    <div>
+                    <div className="flex flex-col items-center justify-center px-4 py-2 mb-2">
                         <button
-                            onClick={() => {}}
+                            onClick={onClose}
                             className="px-14 py-3 bg-violet-600 text-white text-sm rounded-2xl
                             transition-all duration-200 active:scale-75 hover:bg-violet-400"
                         >
