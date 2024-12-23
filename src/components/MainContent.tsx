@@ -24,7 +24,7 @@ const MainContent = () => {
 
 
             {/* Interactive Area */}
-            <div className="flex-1 flex flex-col items-center justify-between w-full max-w-md relative mt-2">
+            <div className="flex-1 flex flex-col items-center justify-start w-full max-w-md relative mt-2 bg-gradient-to-t from-violet-200 via-violet-100 to-white">
                 {/*dsicription*/}
                 <div
                     className="flex mb-2 mt-2 text-center relative italic text-gray-500 w-full pl-16 pr-16 text-sm pb-10">
@@ -41,7 +41,7 @@ const MainContent = () => {
 
                 {/* Plus Button with Faster Color Transition */}
                 {/* Flame Button Container */}
-                <div className="relative inline-flex items-center justify-center">
+                <div className="relative inline-flex items-center justify-center mb-5 mt-0">
                     {/* Flame effects - perfectly centered */}
                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                         <div className="flame-ring flame-1"></div>
@@ -50,15 +50,17 @@ const MainContent = () => {
                     </div>
 
                     {/* Plus Button */}
-                    <button
-                        onClick={() => setIsModalOpen(!isModalOpen)}
-                        className="w-16 h-16 rounded-full flex items-center justify-center
-                                 transform active:scale-90 transition-transform
-                                 focus:outline-none hover:scale-105 bg-violet-600 z-10
-                                 relative"
-                    >
-                        <Plus className="w-11 h-11 text-white" strokeWidth={1}/>
-                    </button>
+                    <div>
+                        <button
+                            onClick={() => setIsModalOpen(!isModalOpen)}
+                            className="w-16 h-16 rounded-full flex items-center justify-center
+                                     transform active:scale-90 transition-transform
+                                     focus:outline-none hover:scale-105 bg-violet-600 z-10
+                                     relative"
+                        >
+                            <Plus className="w-11 h-11 text-white" strokeWidth={1}/>
+                        </button>
+                    </div>
                 </div>
             </div>
 

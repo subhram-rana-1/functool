@@ -108,7 +108,6 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
         const { clientX, clientY } = e.touches ? e.touches[0] : e;
         setStartPanPoint({ x: clientX, y: clientY });
 
-        // Store current canvas content before panning
         if (contextRef.current) {
             const canvas = canvasRef.current;
             setCanvasContent(contextRef.current.getImageData(0, 0, canvas.width, canvas.height));
@@ -116,35 +115,30 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
     };
 
     const handlePanning = (e) => {
-        if (!isPanning) return;
+        if (!isPanning || !canvasContent) return;
         e.preventDefault();
 
         const { clientX, clientY } = e.touches ? e.touches[0] : e;
-        const deltaX = clientX - startPanPoint.x;
-        const deltaY = clientY - startPanPoint.y;
+        const dx = clientX - startPanPoint.x;
+        const dy = clientY - startPanPoint.y;
 
-        setPanOffset(prev => ({
-            x: prev.x + deltaX,
-            y: prev.y + deltaY
-        }));
-        setStartPanPoint({ x: clientX, y: clientY });
+        const canvas = canvasRef.current;
+        contextRef.current.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Redraw canvas content at new position
-        if (contextRef.current && canvasContent) {
-            const canvas = canvasRef.current;
-            contextRef.current.clearRect(0, 0, canvas.width, canvas.height);
+        // Redraw background
+        const pattern = createDottedPattern(contextRef.current);
+        contextRef.current.fillStyle = pattern;
+        contextRef.current.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Redraw background pattern
-            const pattern = createDottedPattern(contextRef.current);
-            contextRef.current.fillStyle = pattern;
-            contextRef.current.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw content at new position
-            contextRef.current.putImageData(canvasContent, panOffset.x + deltaX, panOffset.y + deltaY);
-        }
+        // Update position
+        contextRef.current.putImageData(canvasContent, dx, dy);
     };
 
     const stopPanning = () => {
+        if (isPanning && contextRef.current) {
+            const canvas = canvasRef.current;
+            setCanvasContent(contextRef.current.getImageData(0, 0, canvas.width, canvas.height));
+        }
         setIsPanning(false);
     };
 
@@ -157,7 +151,8 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
         e.preventDefault();
         const { x, y } = getCoordinates(e);
         contextRef.current.beginPath();
-        contextRef.current.moveTo(x - panOffset.x, y - panOffset.y);
+        // contextRef.current.moveTo(x - panOffset.x, y - panOffset.y);
+        contextRef.current.moveTo(x, y);
         setIsDrawing(true);
         setHasContent(true);
     };
@@ -171,7 +166,8 @@ const WhiteboardModal = ({ isOpen, onClose }) => {
         if (!isDrawing) return;
         e.preventDefault();
         const { x, y } = getCoordinates(e);
-        contextRef.current.lineTo(x - panOffset.x, y - panOffset.y);
+        // contextRef.current.lineTo(x - panOffset.x, y - panOffset.y);
+        contextRef.current.lineTo(x, y);
         contextRef.current.stroke();
     };
 
