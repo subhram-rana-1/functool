@@ -15,6 +15,10 @@
     background-color: #a66ac6; /*575757, 7200B0*/
 }
 
+.heading-font {
+    font-family: "Roboto Thin", sans-serif;
+}
+
 .ads-area-gray {
     background-color: white; /* #EDEDED */
 }
