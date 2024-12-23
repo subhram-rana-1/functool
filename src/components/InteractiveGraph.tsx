@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import {Plus} from "lucide-react";
 
 const InteractiveGraph = () => {
     const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -6,6 +7,7 @@ const InteractiveGraph = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [startPan, setStartPan] = useState({ x: 0, y: 0 });
     const svgRef = useRef(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Touch and mouse event handlers
     const handleStart = (e) => {
@@ -162,21 +164,35 @@ const InteractiveGraph = () => {
     }, [isDragging, offset]);
 
     return (
-        <div className="w-full h-full overflow-hidden touch-none border-black border-4 border-b-4">
-            <svg
-                ref={svgRef}
-                className="w-full h-full cursor-move"
-                viewBox="-400 -300 800 600"
-                onMouseDown={handleStart}
-                onMouseMove={handleMove}
-                onMouseUp={handleEnd}
-                onMouseLeave={handleEnd}
-                onWheel={handleZoom}
-            >
-                <g transform={`translate(${offset.x}, ${offset.y}) scale(${scale})`}>
-                    {renderGridLines()}
-                </g>
-            </svg>
+        <div className="relative w-full h-full">
+            <div className="w-full h-full overflow-hidden touch-none border-violet-700 border-4 border-b-4">
+                <svg
+                    ref={svgRef}
+                    className="w-full h-full cursor-move"
+                    viewBox="-400 -300 800 600"
+                    onMouseDown={handleStart}
+                    onMouseMove={handleMove}
+                    onMouseUp={handleEnd}
+                    onMouseLeave={handleEnd}
+                    onWheel={handleZoom}
+                >
+                    <g transform={`translate(${offset.x}, ${offset.y}) scale(${scale})`}>
+                        {renderGridLines()}
+                    </g>
+                </svg>
+            </div>
+
+            {/* Plus button positioned absolutely in the center bottom */}
+            <div className="absolute bottom-1 left-1/2 -translate-x-1/2">
+                <button
+                    onClick={() => setIsModalOpen(!isModalOpen)}
+                    className="w-12 h-12 rounded-full flex items-center justify-center
+                   transform active:scale-75 duration-200
+                   focus:outline-none hover:scale-105 bg-violet-600 z-10"
+                >
+                    <Plus className="w-8 h-8 text-white" strokeWidth={1} />
+                </button>
+            </div>
         </div>
     );
 };
