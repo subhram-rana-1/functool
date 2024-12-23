@@ -28,7 +28,7 @@ const GraphContent = () => {
     return (
         <div className="relative w-full h-full bg-white flex-grow">
             {/* Graph Area */}
-            <InteractiveGraph />
+            <InteractiveGraph/>
 
             {/* Menu Button */}
             <div className="top-4 right-4 relative">

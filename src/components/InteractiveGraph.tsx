@@ -1,5 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {Plus} from "lucide-react";
+import { Plus, Pencil, Eye, MoreVertical } from "lucide-react";
+import WhiteboardModal from './WhiteboardModal';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "./Dropdown";
 
 const InteractiveGraph = () => {
     const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -8,9 +15,53 @@ const InteractiveGraph = () => {
     const [startPan, setStartPan] = useState({ x: 0, y: 0 });
     const svgRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDrawingMode, setIsDrawingMode] = useState(false);
+    const [currentPath, setCurrentPath] = useState(null);
+    const [paths, setPaths] = useState([]);
+
+    // Drawing functionality
+    const startDrawing = (e) => {
+        if (!isDrawingMode) return;
+
+        const svg = svgRef.current;
+        const point = svg.createSVGPoint();
+        const rect = svg.getBoundingClientRect();
+        const eventPoint = 'touches' in e ? e.touches[0] : e;
+
+        point.x = (eventPoint.clientX - rect.left) / scale - offset.x;
+        point.y = (eventPoint.clientY - rect.top) / scale - offset.y;
+
+        setCurrentPath(`M ${point.x} ${point.y}`);
+    };
+
+    const draw = (e) => {
+        if (!isDrawingMode || !currentPath) return;
+
+        const svg = svgRef.current;
+        const point = svg.createSVGPoint();
+        const rect = svg.getBoundingClientRect();
+        const eventPoint = 'touches' in e ? e.touches[0] : e;
+
+        point.x = (eventPoint.clientX - rect.left) / scale - offset.x;
+        point.y = (eventPoint.clientY - rect.top) / scale - offset.y;
+
+        setCurrentPath(prev => `${prev} L ${point.x} ${point.y}`);
+    };
+
+    const endDrawing = () => {
+        if (!isDrawingMode || !currentPath) return;
+
+        setPaths(prev => [...prev, currentPath]);
+        setCurrentPath(null);
+    };
 
     // Touch and mouse event handlers
     const handleStart = (e) => {
+        if (isDrawingMode) {
+            startDrawing(e);
+            return;
+        }
+
         setIsDragging(true);
         const point = ('touches' in e) ? e.touches[0] : e;
         setStartPan({
@@ -19,8 +70,13 @@ const InteractiveGraph = () => {
         });
     };
 
-    const PAN_SPEED = 1; // Increase for faster panning (default is 1)
+    const PAN_SPEED = 1;
     const handleMove = (e) => {
+        if (isDrawingMode) {
+            draw(e);
+            return;
+        }
+
         if (isDragging) {
             e.preventDefault();
             const point = ('touches' in e) ? e.touches[0] : e;
@@ -32,23 +88,28 @@ const InteractiveGraph = () => {
     };
 
     const handleEnd = () => {
+        if (isDrawingMode) {
+            endDrawing();
+            return;
+        }
         setIsDragging(false);
     };
 
-    // Zoom parameters
-    const ZOOM_FACTOR = 0.95; // Increase for less sensitive zoom (0.9->0.95)
+    const ZOOM_FACTOR = 0.95;
     const MIN_ZOOM = 0.5;
     const MAX_ZOOM = 5;
 
-    // Modified zoom handler
     const handleZoom = (e) => {
+        if (isDrawingMode) return;
+
         e.preventDefault();
         const delta = e.deltaY > 0 ? ZOOM_FACTOR : 1/ZOOM_FACTOR;
         setScale(prev => Math.min(Math.max(prev * delta, MIN_ZOOM), MAX_ZOOM));
     };
 
-    // Modified pinch zoom
     const handlePinchZoom = (e) => {
+        if (isDrawingMode) return;
+
         if (e.touches.length === 2) {
             e.preventDefault();
             const touch1 = e.touches[0];
@@ -74,7 +135,6 @@ const InteractiveGraph = () => {
         const spacing = 50;
         const range = 50;
 
-        // Add background
         lines.push(
             <rect
                 key="background"
@@ -86,12 +146,10 @@ const InteractiveGraph = () => {
             />
         );
 
-        // Grid lines
         for (let i = -range; i <= range; i++) {
             const x = i * spacing;
             const y = i * spacing;
 
-            // Vertical lines
             lines.push(
                 <line
                     key={`v${i}`}
@@ -104,7 +162,6 @@ const InteractiveGraph = () => {
                 />
             );
 
-            // Horizontal lines
             lines.push(
                 <line
                     key={`h${i}`}
@@ -117,7 +174,6 @@ const InteractiveGraph = () => {
                 />
             );
 
-            // Labels
             if (i !== 0 && i % 1 === 0) {
                 lines.push(
                     <text
@@ -161,14 +217,14 @@ const InteractiveGraph = () => {
             svg.removeEventListener('touchend', handleEnd);
             svg.removeEventListener('touchmove', handlePinchZoom);
         };
-    }, [isDragging, offset]);
+    }, [isDragging, offset, isDrawingMode]);
 
     return (
         <div className="relative w-full h-full">
             <div className="w-full h-full overflow-hidden touch-none border-violet-700 border-4 border-b-4">
                 <svg
                     ref={svgRef}
-                    className="w-full h-full cursor-move"
+                    className={`w-full h-full ${isDrawingMode ? 'cursor-crosshair' : 'cursor-move'}`}
                     viewBox="-400 -300 800 600"
                     onMouseDown={handleStart}
                     onMouseMove={handleMove}
@@ -178,21 +234,83 @@ const InteractiveGraph = () => {
                 >
                     <g transform={`translate(${offset.x}, ${offset.y}) scale(${scale})`}>
                         {renderGridLines()}
+                        {paths.map((path, index) => (
+                            <path
+                                key={index}
+                                d={path}
+                                stroke="black"
+                                strokeWidth="2"
+                                fill="none"
+                            />
+                        ))}
+                        {currentPath && (
+                            <path
+                                d={currentPath}
+                                stroke="black"
+                                strokeWidth="2"
+                                fill="none"
+                            />
+                        )}
                     </g>
                 </svg>
             </div>
 
-            {/* Plus button positioned absolutely in the center bottom */}
-            <div className="absolute bottom-1 left-1/2 -translate-x-1/2">
+            {/* Control buttons */}
+            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-4">
                 <button
-                    onClick={() => setIsModalOpen(!isModalOpen)}
+                    onClick={() => setIsDrawingMode(!isDrawingMode)}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center
+                    transform active:scale-75 duration-200
+                    focus:outline-none hover:scale-105 
+                    ${isDrawingMode ? 'bg-violet-800' : 'bg-violet-600'} z-10`}
+                >
+                    <Pencil className="w-6 h-6 text-white" strokeWidth={1.5} />
+                </button>
+
+                <button
                     className="w-12 h-12 rounded-full flex items-center justify-center
-                   transform active:scale-75 duration-200
-                   focus:outline-none hover:scale-105 bg-violet-600 z-10"
+                    transform active:scale-75 duration-200
+                    focus:outline-none hover:scale-105 bg-violet-600 z-10"
+                >
+                    <Eye className="w-6 h-6 text-white" strokeWidth={1.5} />
+                </button>
+
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="w-12 h-12 rounded-full flex items-center justify-center
+                    transform active:scale-75 duration-200
+                    focus:outline-none hover:scale-105 bg-violet-600 z-10"
                 >
                     <Plus className="w-8 h-8 text-white" strokeWidth={1} />
                 </button>
             </div>
+
+            {/* Three-dot menu */}
+            <div className="absolute top-4 right-4">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button
+                            className="w-10 h-10 rounded-full flex items-center justify-center
+                            transform active:scale-75 duration-200
+                            focus:outline-none hover:scale-105 bg-violet-600"
+                        >
+                            <MoreVertical className="w-6 h-6 text-white" />
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem>Hide / Unhide</DropdownMenuItem>
+                        <DropdownMenuItem>Differentiation</DropdownMenuItem>
+                        <DropdownMenuItem>Integration</DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+
+            <WhiteboardModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+            />
         </div>
     );
 };
